@@ -32,7 +32,6 @@ function TaskForm({ fetchTasks, editingTask, setEditingTask }) {
       dueDate: "",
     });
 
-    setPage(1);
     fetchTasks();
   };
 

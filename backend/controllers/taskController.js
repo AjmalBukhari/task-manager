@@ -34,6 +34,12 @@ export const getTasks = asyncHandler(async (req, res) => {
     ? { status: req.query.status }
     : {};
 
+    const statusColor = {
+      Pending: "text-yellow-500",
+      "In Progress": "text-blue-500",
+      Completed: "text-green-500",
+    };
+
   const query = {
     user: req.user._id,
     ...keyword,
