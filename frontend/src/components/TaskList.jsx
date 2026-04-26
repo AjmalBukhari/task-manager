@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getAllTasks, deleteTask } from "../services/api";
 import TaskForm from "./TaskForm";
 
@@ -13,18 +13,20 @@ export default function TaskList() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
 
-  const fetchTasks = async () => {
+  // ================= FETCH TASKS =================
+  const fetchTasks = useCallback(async () => {
     const { data } = await getAllTasks({
       search,
       status,
     });
     setTasks(data);
-  };
+  }, [search, status]); // ✅ dependencies
 
   useEffect(() => {
     fetchTasks();
-  }, [search, status]);
+  }, [fetchTasks]); // ✅ clean
 
+  // ================= DELETE =================
   const handleDelete = async (id) => {
     if (window.confirm("Delete this task?")) {
       await deleteTask(id);
@@ -33,20 +35,23 @@ export default function TaskList() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     window.location.reload();
   };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between mb-4 gap-3 items-center flex-wrap">
+        
         <SearchBar
           onSearch={setSearch}
           onFilter={setStatus}
         />
 
         <ProgressBar tasks={tasks} />
+
         <h1 className="text-xl font-bold">Tasks</h1>
+
         <button
           onClick={handleLogout}
           className="bg-red-500 text-white px-3 py-1 rounded"

@@ -1,7 +1,15 @@
-import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 
 export default function Toast({ toasts = [], removeToast }) {
+
+useEffect(() => {
+  const timers = toasts.map((t) =>
+    setTimeout(() => removeToast(t.id), 3000)
+  );
+
+  return () => timers.forEach(clearTimeout);
+}, [toasts, removeToast]);
 
   return (
     <div className="fixed top-5 right-5 z-50 space-y-3">

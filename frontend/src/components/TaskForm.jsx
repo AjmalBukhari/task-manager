@@ -2,20 +2,22 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { createTask, updateTask } from '../services/api';
 
+
+const initialState = {
+  title: '',
+  description: '',
+  status: 'Pending',
+  priority: 'Low',
+  dueDate: '',
+  pinned: false
+};
+
 export default function TaskForm({ task, onClose, onSaved, showToast }) {
 
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    status: 'Pending',
-    priority: 'Low',
-    dueDate: '',
-    pinned: false
-  });
-
+  const [form, setForm] = useState(initialState);
   const [loading, setLoading] = useState(false);
 
-  // ================= PREFILL (EDIT MODE) =================
+  // ================= PREFILL =================
   useEffect(() => {
     if (task) {
       setForm({
@@ -26,17 +28,19 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
         dueDate: task.dueDate?.slice(0, 10) || '',
         pinned: task.pinned || false
       });
+    } else {
+      setForm(initialState);
     }
   }, [task]);
 
-  // ================= HANDLE INPUT =================
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value
-    });
+    }));
   };
 
   // ================= SUBMIT =================
@@ -54,9 +58,12 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
       } else {
         await createTask(form);
         showToast('Task created');
+
+        // ✅ CLEAR FORM AFTER CREATE
+        setForm(initialState);
       }
 
-      onSaved();
+      if (onSaved) onSaved();
 
     } catch (err) {
       showToast(
@@ -75,39 +82,34 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
       transition={{ duration: 0.25 }}
       className="bg-white p-5 rounded-xl shadow-sm border max-w-xl mx-auto"
     >
-
-      {/* TITLE */}
       <h2 className="text-lg font-semibold mb-4">
         {task ? 'Edit Task' : 'Add New Task'}
       </h2>
 
       <div className="space-y-3">
 
-        {/* TITLE INPUT */}
         <input
           name="title"
           placeholder="Task title"
           value={form.title}
           onChange={handleChange}
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500"
         />
 
-        {/* DESCRIPTION */}
         <textarea
           name="description"
           placeholder="Description"
           value={form.description}
           onChange={handleChange}
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500"
         />
 
-        {/* STATUS + PRIORITY */}
         <div className="grid grid-cols-2 gap-3">
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="border p-2 rounded focus:ring-2 focus:ring-indigo-500"
+            className="border p-2 rounded"
           >
             <option>Pending</option>
             <option>In Progress</option>
@@ -118,7 +120,7 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
             name="priority"
             value={form.priority}
             onChange={handleChange}
-            className="border p-2 rounded focus:ring-2 focus:ring-indigo-500"
+            className="border p-2 rounded"
           >
             <option>Low</option>
             <option>Medium</option>
@@ -126,16 +128,14 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
           </select>
         </div>
 
-        {/* DATE */}
         <input
           type="date"
           name="dueDate"
           value={form.dueDate}
           onChange={handleChange}
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500"
+          className="w-full border p-2 rounded"
         />
 
-        {/* PIN */}
         <label className="flex items-center gap-2 text-sm text-gray-600">
           <input
             type="checkbox"
@@ -146,23 +146,18 @@ export default function TaskForm({ task, onClose, onSaved, showToast }) {
           Pin this task
         </label>
 
-        {/* ACTIONS */}
         <div className="flex gap-2 pt-2">
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition disabled:opacity-50"
+            className="bg-indigo-600 text-white px-4 py-2 rounded"
           >
-            {loading
-              ? 'Saving...'
-              : task
-                ? 'Update'
-                : 'Create'}
+            {loading ? 'Saving...' : task ? 'Update' : 'Create'}
           </button>
 
           <button
             onClick={onClose}
-            className="border px-4 py-2 rounded hover:bg-gray-100"
+            className="border px-4 py-2 rounded"
           >
             Cancel
           </button>

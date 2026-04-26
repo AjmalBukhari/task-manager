@@ -1,0 +1,189 @@
+import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+
+import { getAllTasks, deleteTask } from "../../services/api";
+import SearchBar from "../SearchBar";
+import TaskForm from "../TaskForm";
+
+export default function AllTasks({ showToast }) {
+  const [tasks, setTasks] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+
+  // ================= FETCH =================
+  const fetchTasks = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await getAllTasks({ search, status });
+      setTasks(data);
+    } catch {
+      showToast("Failed to load tasks", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [search, status, showToast]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // ================= SELECTION =================
+  const toggleSelect = (id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    if (selected.length === tasks.length) {
+      setSelected([]);
+    } else {
+      setSelected(tasks.map((t) => t._id));
+    }
+  };
+
+  // ================= DELETE =================
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this task?")) return;
+
+    try {
+      await deleteTask(id);
+      showToast("Task deleted", "error");
+      fetchTasks();
+    } catch {
+      showToast("Delete failed", "error");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm("Delete selected tasks?")) return;
+
+    await Promise.all(selected.map((id) => deleteTask(id)));
+
+    showToast("Selected tasks deleted", "error");
+    setSelected([]);
+    fetchTasks();
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+
+      <SearchBar onSearch={setSearch} onFilter={setStatus} />
+
+      <div className="bg-white rounded-xl shadow-sm p-4">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold">All Tasks</h2>
+
+          {selected.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded"
+            >
+              Delete Selected ({selected.length})
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-gray-500">Loading...</p>
+        ) : tasks.length === 0 ? (
+          <p className="text-sm text-gray-400">No tasks found</p>
+        ) : (
+          <div className="space-y-2">
+
+            {/* SELECT ALL */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={tasks.length > 0 && selected.length === tasks.length}
+                onChange={selectAll}
+              />
+              Select All
+            </div>
+
+            {tasks.map((task) => (
+              <motion.div
+                key={task._id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-between items-center border p-3 rounded-lg"
+              >
+                {/* LEFT */}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(task._id)}
+                    onChange={() => toggleSelect(task._id)}
+                  />
+
+                  <div>
+                    <h4 className="font-medium">{task.title}</h4>
+                    <p className="text-xs text-gray-500">{task.description}</p>
+                  </div>
+                </div>
+
+                {/* RIGHT */}
+                <div className="flex items-center gap-3">
+
+                  <span className={`text-xs px-2 py-1 rounded-full
+                    ${task.status === "Completed"
+                      ? "bg-green-100 text-green-700"
+                      : task.status === "In Progress"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-yellow-100 text-yellow-700"}`}
+                  >
+                    {task.status}
+                  </span>
+
+                  <button
+                    onClick={() => setEditingTask(task)}
+                    className="text-blue-500 text-sm"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(task._id)}
+                    className="text-red-500 text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+
+          </div>
+        )}
+      </div>
+
+      {/* EDIT MODAL */}
+      {editingTask && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div onClick={() => setEditingTask(null)} className="absolute inset-0" />
+
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="bg-white rounded-xl p-4 w-full max-w-xl z-10"
+          >
+            <TaskForm
+              task={editingTask}
+              onClose={() => setEditingTask(null)}
+              onSaved={() => {
+                setEditingTask(null);
+                fetchTasks();
+              }}
+              showToast={showToast}
+            />
+          </motion.div>
+        </div>
+      )}
+
+    </motion.div>
+  );
+}

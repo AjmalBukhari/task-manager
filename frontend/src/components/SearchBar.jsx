@@ -12,7 +12,7 @@ export default function SearchBar({ onSearch, onFilter }) {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, onSearch]); // ✅ FIXED
 
   // ================= FILTER =================
   const handleFilter = (value) => {

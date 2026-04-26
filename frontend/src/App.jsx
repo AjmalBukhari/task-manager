@@ -9,6 +9,7 @@ import AddTask from "./components/pages/AddTask";
 import BinTask from "./components/pages/BinTask";
 
 import Profile from "./components/pages/Profile";
+import AllTasks from "./components/pages/AllTasks";
 
 export default function App() {
   // ================= AUTH =================
@@ -53,6 +54,9 @@ export default function App() {
           switch (activeMenu) {
             case "Dashboard":
               return <Dashboard showToast={showToast} search={search} />;
+
+            case "All Tasks":
+              return <AllTasks showToast={showToast} />;
 
             case "Add Task":
               return <AddTask showToast={showToast} />;

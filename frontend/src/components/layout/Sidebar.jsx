@@ -4,6 +4,7 @@ export default function Sidebar({ active, onChange }) {
 
   const menuItems = [
     { name: 'Dashboard', icon: '📊' },
+    { name: 'All Tasks', icon: '📋' },
     { name: 'Add Task', icon: '➕' },
     { name: 'Bin Task', icon: '🗑️' },
     { name: 'Profile', icon: '👤' },

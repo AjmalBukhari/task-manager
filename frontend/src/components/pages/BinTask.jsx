@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 import {
@@ -13,7 +13,7 @@ export default function BinTask({ showToast }) {
   const [loading, setLoading] = useState(false);
 
   // ================= FETCH BIN TASKS =================
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await getBinTasks();
@@ -23,11 +23,11 @@ export default function BinTask({ showToast }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]); // ✅ dependency added
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]); // ✅ clean
 
   // ================= RESTORE =================
   const handleRestore = async (id) => {

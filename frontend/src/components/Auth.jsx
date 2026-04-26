@@ -17,7 +17,7 @@ export default function Auth({ onAuth, showToast }) {
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.fullname]: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -32,7 +32,6 @@ export default function Auth({ onAuth, showToast }) {
 
       if (isLogin) {
         const { data } = await loginUser({
-          fullname: form.fullname,
           email: form.email,
           password: form.password,
         });

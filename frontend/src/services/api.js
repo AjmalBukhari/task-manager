@@ -43,6 +43,9 @@ export const getProfile = () =>
 export const updateProfile = (data) => 
   API.put('/auth/me', data);
 
+export const deleteAccount = () =>
+  API.delete('/auth/me');
+
 // ================= TASKS =================
 
 // Get all tasks (with search + filter)
