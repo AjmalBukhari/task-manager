@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
 });
 
 
-
+// ================= PROFILE GET =================
 router.get('/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -93,6 +93,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 
+// ================= PROFILE UPDATE =================
 router.put('/me', auth, async (req, res) => {
   try {
     const { fullname, password } = req.body;
