@@ -114,7 +114,7 @@ task-manager/
 ## 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/your-username/task-manager.git
+git clone https://github.com/ajmalbukhari/task-manager.git
 cd task-manager
 ```
 
